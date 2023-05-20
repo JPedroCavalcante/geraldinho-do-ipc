@@ -15,5 +15,5 @@ int main() {
     scanf("%s", sharedMemory);
     printf("Você enviou a seguinte mensagem para a memória compartilhada: %s\n", sharedMemory);
     shmdt(sharedMemory);
-    printf("Saindo da memória, bye bye!!");
+    printf("Estou me desligando e saindo da memória compartilhada para que eu deixe seus dados salvos senhor, tenha um bom dia!!");
 }

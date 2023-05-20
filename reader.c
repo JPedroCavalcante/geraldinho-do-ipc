@@ -17,25 +17,50 @@ int main() {
     sizeMessage = strlen(buff);
     if (sizeMessage > 0) {
 
-        printf("Opa, parece que tem uma mensagem em nossa memória compartilhada, deseja visualiza-lá?[S/N] :");
-        scanf("%c", &option);
+        printf("Chefia, parece que tem uma mensagem em nossa memória compartilhada, deseja visualiza-lá? [S/N]: ");
 
-        switch (option) {
-            case 'S':
-                printf("%s\n", buff);
-                break;
+        do {
+            scanf("%c", &option);
 
-            case 'N':
-                printf("Tudo bem, tenha um ótimo dia, até mais!!");
-                break;
+            switch (option) {
+                case 'S':
+                    printf("%s\n", buff);
+                    break;
 
-            default:
-                printf("Opção incorreta informada!");
-                break;
-        }
+                case 'N':
+                    printf("Tudo bem, tenha um ótimo dia, até mais senhor!!");
+                    break;
+
+                default:
+                    printf("Não conheço essa opção informada senhor, por gentileza informar uma opção correta: ");
+                    break;
+            }
+        } while (option != 'S' && option != 'N');
 
     } else {
-        printf("A memória compartilhada está vazia, deseja inserir algo nela?");
+        printf("A memória compartilhada está vazia, deseja inserir algo nela senhor? [S/N]: ");
+
+        do {
+            scanf("%c", &option);
+
+            switch (option) {
+                case 'S':
+                    printf("Qual mensagem deseja inserir algo senhor?\n");
+                    scanf("%s", buff);
+                    strcpy(sharedMemory, buff);
+
+                    break;
+
+                case 'N':
+                    printf("Tudo bem, tenha um ótimo dia, até mais senhor!!");
+                    break;
+
+                default:
+                    printf("Não conheço essa opção informada senhor, por gentileza informar uma opção correta: ");
+                    break;
+            }
+        } while (option != 'S' && option != 'N');
     }
-    printf("Saindo da memória, bye bye!!");
+    shmdt(sharedMemory);
+    printf("Estou me desligando e saindo da memória compartilhada para que eu deixe seus dados salvos senhor, tenha um bom dia!!\n");
 }
