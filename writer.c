@@ -12,7 +12,7 @@ int main() {
     printf("o ID de sua memória compartilhada é %d\n", sharedMemoryId); // Exibe na tela o ID da memória compartilhada
     sharedMemory = shmat(sharedMemoryId, 0, 0);
     printf("Escreva a mensagem que deseja enviar para a memória compartilhada:\n");
-    scanf("%s", sharedMemory);
+    fgets(sharedMemory, 1024, stdin);
     printf("Você enviou a seguinte mensagem para a memória compartilhada: %s\n", sharedMemory);
     shmdt(sharedMemory);
     printf("Estou me desligando e saindo da memória compartilhada para que eu deixe seus dados salvos senhor, tenha um bom dia!!");
