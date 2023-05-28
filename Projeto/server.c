@@ -36,40 +36,27 @@ int main(){
     shmid == -1 ? (perror("Erro ao criar o segmento de memoria compartilhada"), exit(1)) : printf("Segmento de memoria compartilhada criado com sucesso!\n");
 
     // Associa o segmento de memoria compartilhada ao processo
-    Message *message = (Message *) shmat(shmid, 0, 0);
+    Message *shared_mem = (Message *) shmat(shmid, 0, 0);
     // Valida se houve um erro:
-    message == (void *) -1 ? (perror("Erro ao associar o segmento de memoria compartilhada ao processo"), exit(1)) : printf("Segmento de memoria compartilhada associado ao processo com sucesso!\n");
+    shared_mem == (void *) -1 ? (perror("Erro ao associar o segmento de memoria compartilhada ao processo"), exit(1)) : printf("Segmento de memoria compartilhada associado ao processo com sucesso!\n");
 
-    int max_clientes;
-    printf("Seja bem vindo ao nosso servidor de mensagens!\n");
-    printf("Digite quantos clientes deseja criar: ");
-    scanf("%d", &max_clientes);
+    // Servidor iniciado: 
+    printf("%d\n", shmid);
+    printf("%d\n", key);
+    printf("Servidor iniciado!\n");
 
-
-    // Inicializa o id
-    message->id = -1;
-
-
-    int i;
-    for(i = 0; i < max_clientes; i++){
-        // Inicializa o processo
-        int pid = fork();
-        if (pid < 0) {
-            perror("Erro ao criar o processo fork");
-            exit(1);
-        } else if (pid == 0) {
-            // Processo filho
-            execl("./client", "client", NULL);
-            perror("execl");
-            exit(1);
+    while(1) {
+        // Verificar se há uma nova mensagem na memória:
+        printf("Mensagem recebida do Cliente %d: %s", shared_mem->id, shared_mem->msg);
+        if (shared_mem->id > 0 && strlen(shared_mem->msg) > 0){
+            printf("Mensagem recebida do Cliente %d: %s", shared_mem->id, shared_mem->msg);
+            shared_mem->id = 0;
+            memset(shared_mem->msg, 0, sizeof(shared_mem->msg));
         }
     }
 
-    // Mostra todas as mensagens recebidas
-    receiveMessage(shmid);
-
     // Desassocia o segmento de memoria compartilhada do processo
-    if (shmdt(message) < 0) {
+    if (shmdt(shared_mem) < 0) {
         perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
         exit(1);
     }
