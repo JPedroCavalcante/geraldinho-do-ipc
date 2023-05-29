@@ -2,12 +2,13 @@
 #include "libs.h"
 
 #define MAX_MSG_SIZE 100
+#define MAX_FILE_SIZE 1000
 
 typedef struct {
     int client_id;
     char message[MAX_MSG_SIZE];
     char file_name[MAX_MSG_SIZE];
-    char file_content[MAX_MSG_SIZE];
+    char file_content[MAX_FILE_SIZE];
     int file_size;
 } Message;
 

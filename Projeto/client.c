@@ -1,22 +1,16 @@
 #include "libs.h"
 
 #define MAX_MSG_SIZE 100
+#define MAX_FILE_SIZE 1000
 
 typedef struct {
-    int id;
+    int client_id;
     char message[MAX_MSG_SIZE];
+    char file_name[MAX_MSG_SIZE];
+    char file_content[MAX_MSG_SIZE];
+    int file_size;
 } Message;
 
-int menu(){
-    printf("O que deseja fazer?\n");
-    printf("1 - Enviar mensagem\n");
-    printf("2 - Listar mensagens\n");
-    printf("3 - Sair\n");
-    printf("Digite sua opcao: ");
-    int opcao;
-    scanf("%d", &opcao);
-    return opcao;
-}
 
 int main() {
     key_t key = generateKey();
@@ -24,7 +18,7 @@ int main() {
     int shmid = shmget(key, sizeof(Message),0);
     // Valida se houve um erro no acesso:
     if (shmid == -1) {
-        perror("Erro ao criar o segmento de memoria compartilhada");
+        perror("Erro ao acessar o segmento de memoria compartilhada");
         exit(1);
     }
 
@@ -45,22 +39,24 @@ int main() {
 
     while (1) {
         //menu:
-        printf("O que deseja fazer?\n");
-        printf("1 - Enviar mensagem\n");
-        printf("2 - Ver mensagem\n");
-        printf("Qualquer tecla - Sair\n");
+        printf("\nO que deseja fazer?\n");
+        printf("1. Enviar mensagem\n");
+        printf("2. Ver mensagem\n");
+        printf("3. Enviar arquivo\n");
+        printf("4. Ver arquivo\n");
+        printf("5. Sair\n");
         printf("Digite sua opcao: ");
 
         int opcao;
         scanf("%d", &opcao);
+        char trash[MAX_MSG_SIZE];
+        fgets(trash, MAX_MSG_SIZE, stdin);
 
         if (opcao == 1) {
             printf("Digite a mensagem: ");
             //Apagar a mensagem atual do servidor
             memset(shared_mem->message, 0, MAX_MSG_SIZE);
             //Ler a mensagem do cliente
-            char trash[MAX_MSG_SIZE];
-            fgets(trash, MAX_MSG_SIZE, stdin);
             char msg[MAX_MSG_SIZE];
             fgets(msg, MAX_MSG_SIZE, stdin);
             //Remover o \n do final da string
@@ -69,7 +65,7 @@ int main() {
             //Copiar a mensagem para a memoria compartilhada
             strcpy(shared_mem->message, msg);
             //Enviar a mensagem para o servidor
-            shared_mem->id = client_id;
+            shared_mem->client_id = client_id;
             printf("Mensagem enviada para o servidor!\n");
             continue;
         }
@@ -82,7 +78,65 @@ int main() {
             printf("----------------------------------------\n");
             continue;
         }
-        else {
+        else if(opcao == 3){
+            // Apagar arquivo atual do servidor:
+            memset(shared_mem->file_name, 0, MAX_MSG_SIZE);
+            memset(shared_mem->file_content, 0, MAX_FILE_SIZE);
+            shared_mem->file_size = 0;
+
+            // Dados do arquivo:
+            char filename[MAX_MSG_SIZE];
+            char file_content[MAX_FILE_SIZE];
+            int file_size;
+
+            printf("Digite o nome do arquivo: ");
+            fgets(filename, MAX_MSG_SIZE, stdin);
+            //Remover o \n do final da string
+            if(filename[strlen(filename) - 1] == '\n') filename[strlen(filename) - 1] = '\0';
+            printf("\n%d\n",strcmp(filename,"arquivo.txt"));
+            FILE *file = fopen(filename, "r");
+            if(file == NULL){
+                printf("Arquivo nao encontrado!\n");
+                continue;
+            }
+            strcpy(shared_mem->file_name, filename);
+            fseek(file, 0, SEEK_END);
+            shared_mem->file_size = ftell(file);
+            fseek(file, 0, SEEK_SET);
+            fread(file_content, shared_mem->file_size, 1, file);
+            strcpy(shared_mem->file_content, file_content);
+            fclose(file);
+            shared_mem->client_id = client_id;
+            continue;
+        }
+        else if (opcao == 4){
+            printf("----------------------------------------\n");
+            printf("|                                       |\n");
+            printf("| -> Arquivo recebido do servidor: %s\n", shared_mem->file_name);
+            printf("| -> Conteudo do arquivo: %s\n", shared_mem->file_content);
+            printf("|                                       |\n");
+            printf("----------------------------------------\n");
+            printf("Baixar o arquivo do servidor ?");
+            printf("1. Sim\n");
+            printf("2. Nao\n");
+            printf("Digite sua opcao: ");
+            int opcao2;
+            scanf("%d", &opcao2);
+            char trash[MAX_MSG_SIZE];
+            fgets(trash, MAX_MSG_SIZE, stdin);
+            if(opcao2 == 1){
+                FILE *file = fopen("baixado.txt", "w");
+                if(file == NULL){
+                    printf("Erro ao criar o arquivo!\n");
+                    continue;
+                }
+                fwrite(shared_mem->file_content, shared_mem->file_size, 1, file);
+                fclose(file);
+                printf("Arquivo baixado com sucesso!\n");
+            }
+            continue;
+        }
+        else if (opcao == 5){
             printf("Cliente %d desconectado do servidor!\n", client_id);
             shmdt(shared_mem) == 0 ? printf("Cliente desassociado do processo com sucesso!\n") : perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
             break;
