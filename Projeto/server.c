@@ -31,8 +31,6 @@ int main(){
 
     // Servidor iniciado: 
     printf("Servidor iniciado!\n");
-    char lido[MAX_MSG_SIZE];
-    printf("\n%d\n", compareString(lido, shared_mem->message));
 
     while(1) {
         // Verificar se há uma nova mensagem na memória:

@@ -59,8 +59,13 @@ int main() {
             //Apagar a mensagem atual do servidor
             memset(shared_mem->message, 0, MAX_MSG_SIZE);
             //Ler a mensagem do cliente
+            char trash[MAX_MSG_SIZE];
+            fgets(trash, MAX_MSG_SIZE, stdin);
             char msg[MAX_MSG_SIZE];
-            scanf(" %s", msg);
+            fgets(msg, MAX_MSG_SIZE, stdin);
+            //Remover o \n do final da string
+            if(msg[strlen(msg) - 1] == '\n') msg[strlen(msg) - 1] = '\0';
+
             //Copiar a mensagem para a memoria compartilhada
             strcpy(shared_mem->message, msg);
             //Enviar a mensagem para o servidor
@@ -70,7 +75,11 @@ int main() {
         }
 
         else if (opcao == 2) {
-            printf("\nMensagem recebida do servidor: %s\n", shared_mem->message);
+            printf("----------------------------------------\n");
+            printf("|                                       |\n");
+            printf("| -> Mensagem recebida do servidor: %s\n", shared_mem->message);
+            printf("|                                       |\n");
+            printf("----------------------------------------\n");
             continue;
         }
         else {
