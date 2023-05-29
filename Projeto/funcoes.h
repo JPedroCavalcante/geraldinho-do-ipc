@@ -1,0 +1,1 @@
+key_t generateKey();
