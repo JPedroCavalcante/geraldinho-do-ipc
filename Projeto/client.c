@@ -69,7 +69,7 @@ int main() {
             if(msg[strlen(msg) - 1] == '\n') msg[strlen(msg) - 1] = '\0';
 
             //Copiar a mensagem para a memoria compartilhada
-            strcpy(shared_mem->message, msg);a
+            strcpy(shared_mem->message, msg);
             //Enviar a mensagem para o servidor
             shared_mem->client_id = client_id;
             printf("Mensagem enviada para o servidor!\n");
