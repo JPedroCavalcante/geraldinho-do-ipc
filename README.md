@@ -22,6 +22,8 @@ Para executar o programa siga os passos abaixo:
     1. 
     
     ```bash
+    cd Projeto
+    gcc -c funcoes.c -o funcoes.o
     gcc server.c funcoes.o -o server
     gcc client.c funcoes.o -o client
     ```
