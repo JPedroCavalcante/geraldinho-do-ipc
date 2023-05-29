@@ -19,6 +19,8 @@ int main(){
 
     // Cria o segmento de memoria compartilhada
     int shmid = shmget(key, sizeof(Message), 0666 | IPC_CREAT);
+    // shmget() = retorna o id do segmento de memoria compartilhada
+
     // Valida se houve um erro:
     if (shmid == -1) {
         perror("Erro ao criar o segmento de memoria compartilhada");
@@ -27,6 +29,9 @@ int main(){
 
     // Associa o segmento de memoria compartilhada ao processo
     Message *shared_mem = (Message *)shmat(shmid, NULL, 0);
+    // shared_mem = ponteiro para o segmento de memoria compartilhada
+    // shmat() = associa o segmento de memoria compartilhada ao processo
+    // (Message *)shmat(shmid, NULL, 0) = converte o ponteiro para o tipo Message
     // Valida se houve um erro:
     if (shared_mem == (void *)-1) {
         perror("Erro ao anexar o segmento de memoria compartilhada");
@@ -62,12 +67,14 @@ int main(){
     }
     // Desassocia o segmento de memoria compartilhada do processo
     if (shmdt(shared_mem) < 0) {
+        // shmdt() = desassocia o segmento de memoria compartilhada do processo
         perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
         exit(1);
     }
 
     // Remove o segmento de memoria compartilhada
     if (shmctl(shmid, IPC_RMID, 0) < 0) {
+        // shmctl() = remove o segmento de memoria compartilhada
         perror("Erro ao remover o segmento de memoria compartilhada");
         exit(1);
     }

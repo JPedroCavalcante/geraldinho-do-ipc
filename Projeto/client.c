@@ -16,6 +16,8 @@ int main() {
     key_t key = generateKey();
     // Acessamos o segmento de memoria compartilhada
     int shmid = shmget(key, sizeof(Message),0);
+    //shmget() = retorna o id do segmento de memoria compartilhada
+
     // Valida se houve um erro no acesso:
     if (shmid == -1) {
         perror("Erro ao acessar o segmento de memoria compartilhada");
@@ -24,6 +26,9 @@ int main() {
 
     // Associa o segmento de memoria compartilhada ao processo
     Message *shared_mem = (Message *)shmat(shmid, NULL, 0);
+    //shared_mem = ponteiro para o segmento de memoria compartilhada
+    //shmat() = associa o segmento de memoria compartilhada ao processo
+
     // Valida se houve um erro:
     if (shared_mem == (void *)-1) {
         perror("Erro ao anexar o segmento de memoria compartilhada");
@@ -34,6 +39,7 @@ int main() {
 
     // Inicializa o id
     int client_id = getpid();
+    // getpid() = retorna o id do processo atual
 
     printf("Cliente %d conectado ao servidor!\n", client_id);
 
@@ -63,7 +69,7 @@ int main() {
             if(msg[strlen(msg) - 1] == '\n') msg[strlen(msg) - 1] = '\0';
 
             //Copiar a mensagem para a memoria compartilhada
-            strcpy(shared_mem->message, msg);
+            strcpy(shared_mem->message, msg);a
             //Enviar a mensagem para o servidor
             shared_mem->client_id = client_id;
             printf("Mensagem enviada para o servidor!\n");
@@ -82,6 +88,7 @@ int main() {
             // Apagar arquivo atual do servidor:
             memset(shared_mem->file_name, 0, MAX_MSG_SIZE);
             memset(shared_mem->file_content, 0, MAX_FILE_SIZE);
+            // memset() = preenche um bloco de memoria com um valor especifico
             shared_mem->file_size = 0;
 
             // Dados do arquivo:
@@ -93,17 +100,27 @@ int main() {
             fgets(filename, MAX_MSG_SIZE, stdin);
             //Remover o \n do final da string
             if(filename[strlen(filename) - 1] == '\n') filename[strlen(filename) - 1] = '\0';
-            printf("\n%d\n",strcmp(filename,"arquivo.txt"));
             FILE *file = fopen(filename, "r");
             if(file == NULL){
                 printf("Arquivo nao encontrado!\n");
                 continue;
             }
             strcpy(shared_mem->file_name, filename);
+
             fseek(file, 0, SEEK_END);
+            // fseek() = posiciona o ponteiro do arquivo
+            // ftell() = retorna o tamanho do arquivo
             shared_mem->file_size = ftell(file);
+            // Usamos o fseek(file,0,SEEK_END) para posicionar o ponteiro do arquivo no final do arquivo
+            // e usamos o ftell(file) para retornar o tamanho do arquivo
+
             fseek(file, 0, SEEK_SET);
+            // fseek() = posiciona o ponteiro do arquivo
+            // SEEK_SET = inicio do arquivo
+            // USamos o fseek(file,0,SEEK_SET) para posicionar o ponteiro do arquivo no inicio do arquivo
+            // para que possamos ler o arquivo
             fread(file_content, shared_mem->file_size, 1, file);
+            // fread() = le o arquivo
             strcpy(shared_mem->file_content, file_content);
             fclose(file);
             shared_mem->client_id = client_id;
@@ -139,6 +156,7 @@ int main() {
         else if (opcao == 5){
             printf("Cliente %d desconectado do servidor!\n", client_id);
             shmdt(shared_mem) == 0 ? printf("Cliente desassociado do processo com sucesso!\n") : perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
+            //shmdt() = desassocia o segmento de memoria compartilhada do processo
             break;
         }
     }
