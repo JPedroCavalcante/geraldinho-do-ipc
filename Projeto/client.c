@@ -116,7 +116,7 @@ int main() {
             printf("| -> Conteudo do arquivo: %s\n", shared_mem->file_content);
             printf("|                                       |\n");
             printf("----------------------------------------\n");
-            printf("Baixar o arquivo do servidor ?");
+            printf("Baixar o arquivo do servidor ?\n");
             printf("1. Sim\n");
             printf("2. Nao\n");
             printf("Digite sua opcao: ");
