@@ -24,8 +24,8 @@ Para executar o programa siga os passos abaixo:
     ```bash
     cd Projeto
     gcc -c funcoes.c -o funcoes.o
-    gcc server.c funcoes.o -o server
-    gcc client.c funcoes.o -o client
+    gcc server.c funcoes.o -o server.out
+    gcc client.c funcoes.o -o client.out
     ```
     
 2. Execução do Servidor: Inicie o programa servidor executando o binário do servidor. Isso abrirá um terminal que ficará aguardando a conexão dos clientes. Por exemplo:
