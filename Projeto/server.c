@@ -6,6 +6,9 @@
 typedef struct {
     int client_id;
     char message[MAX_MSG_SIZE];
+    char file_name[MAX_MSG_SIZE];
+    char file_content[MAX_MSG_SIZE];
+    int file_size;
 } Message;
 
 int main(){
@@ -33,13 +36,27 @@ int main(){
     printf("Servidor iniciado!\n");
 
     while(1) {
-        // Verificar se há uma nova mensagem na memória:
+        // Verificar se há uma alteração na memória:
         if (shared_mem->client_id > 0) {
-            printf("Mensagem recebida do Cliente %d: %s\n", shared_mem->client_id, shared_mem->message);
+            // Verificar se há uma mensagem na memória compartilhada
+            if(strlen(shared_mem->message) > 0){
+                printf("Mensagem recebida do Cliente %d: %s\n", shared_mem->client_id, shared_mem->message);
+            }
+            // Verificar se há um arquivo na memória compartilhada
+            if(strlen(shared_mem->file_name) > 0){
+                printf("Arquivo recebido do Cliente %d: %s\n", shared_mem->client_id, shared_mem->file_name);
+                printf("Conteudo do arquivo: %s\n", shared_mem->file_content);
+                printf("Tamanho do arquivo: %d\n", shared_mem->file_size);
+            }
 
-            // Limpar a mensagem na memória compartilhada
+            // Reseta a validação da memória compartilhada
+            // permitindo que o client acesse a ultima mensagem e so mude quando 
+            // o client enviar uma nova mensagem
+            // o que ira alterar o ID.
+            // ----------------------------------------------------
+            // Aplicando a mesma logica para os arquivos:
+            // Nesse caso, o arquivo só será apagado quando o client enviar um novo arquivo
             shared_mem->client_id = 0;
-            //memset(shared_mem->message, 0, MAX_MSG_SIZE);
         }
     }
     // Desassocia o segmento de memoria compartilhada do processo
