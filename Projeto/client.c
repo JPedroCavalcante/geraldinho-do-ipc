@@ -4,7 +4,7 @@
 
 typedef struct {
     int id;
-    char msg[MAX_MSG_SIZE];
+    char message[MAX_MSG_SIZE];
 } Message;
 
 int menu(){
@@ -18,65 +18,66 @@ int menu(){
     return opcao;
 }
 
-void listaMensagens(){
-    // Listar as mensagem no espaço de memoria:
-
-}
-
 int main() {
     key_t key = generateKey();
     // Acessamos o segmento de memoria compartilhada
     int shmid = shmget(key, sizeof(Message),0);
     // Valida se houve um erro no acesso:
-    shmid == -1 ? perror("Erro ao acessar o segmento de memoria compartilhada"), exit(1)
-    :
-    printf("Segmento de memoria compartilhada acessado com sucesso!\n");
+    if (shmid == -1) {
+        perror("Erro ao criar o segmento de memoria compartilhada");
+        exit(1);
+    }
 
     // Associa o segmento de memoria compartilhada ao processo
-    Message *shared_mem = (Message *) shmat(shmid, 0, 0);
+    Message *shared_mem = (Message *)shmat(shmid, NULL, 0);
     // Valida se houve um erro:
-    shared_mem == (void *) -1 ? perror("Erro ao associar o segmento de memoria compartilhada ao processo"), exit(1)
-    :
-    printf("Segmento de memoria compartilhada associado ao processo com sucesso!\n");
+    if (shared_mem == (void *)-1) {
+        perror("Erro ao anexar o segmento de memoria compartilhada");
+        exit(1);
+    }
+
+    printf("Cliente iniciado\n");
 
     // Inicializa o id
     int client_id = getpid();
-    shared_mem->id = client_id;
 
     printf("Cliente %d conectado ao servidor!\n", client_id);
 
     while (1) {
         //menu:
-        int opcao = menu();
-        if (opcao == 3) {
-            printf("Cliente %d desconectado do servidor!\n", client_id);
-            break;
-        }
-        if (opcao == 2) {
-            printf("Mensagens:\n");
-            listaMensagens();
-            continue;
-        }
+        printf("O que deseja fazer?\n");
+        printf("1 - Enviar mensagem\n");
+        printf("2 - Ver mensagem\n");
+        printf("Qualquer tecla - Sair\n");
+        printf("Digite sua opcao: ");
+
+        int opcao;
+        scanf("%d", &opcao);
+
         if (opcao == 1) {
             printf("Digite a mensagem: ");
-            char trash[100];
-            fgets(trash, 100, stdin);
-            fgets(shared_mem->msg, MAX_MSG_SIZE, stdin);
-            printf("Mensagem: %s", shared_mem->msg);
-            printf("Mensagem enviada com sucesso!\n");
-            size_t len = strlen(shared_mem->msg);
-            if(len > 0 && shared_mem->msg[len-1] == '\n') {
-                shared_mem->msg[len-1] = '\0';
-            }
-            while (shared_mem->id != -1)
-            {
-                sleep(1);
-            }
+            //Apagar a mensagem atual do servidor
+            memset(shared_mem->message, 0, MAX_MSG_SIZE);
+            //Ler a mensagem do cliente
+            char msg[MAX_MSG_SIZE];
+            scanf(" %s", msg);
+            //Copiar a mensagem para a memoria compartilhada
+            strcpy(shared_mem->message, msg);
+            //Enviar a mensagem para o servidor
+            shared_mem->id = client_id;
+            printf("Mensagem enviada para o servidor!\n");
             continue;
         }
-    }
-    shmdt(shared_mem) == 0 ? printf("Segmento de memoria compartilhada desassociado do processo com sucesso!\n") : perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
 
-    printf("%d", shmid);
+        else if (opcao == 2) {
+            printf("\nMensagem recebida do servidor: %s\n", shared_mem->message);
+            continue;
+        }
+        else {
+            printf("Cliente %d desconectado do servidor!\n", client_id);
+            shmdt(shared_mem) == 0 ? printf("Cliente desassociado do processo com sucesso!\n") : perror("Erro ao desassociar o segmento de memoria compartilhada do processo");
+            break;
+        }
+    }
     return 0;
 }
